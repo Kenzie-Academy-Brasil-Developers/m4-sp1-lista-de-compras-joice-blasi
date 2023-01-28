@@ -19,14 +19,10 @@ export const validateBodyMiddleware = (request: Request, response: Response, nex
         data.forEach(item => {
             const keysData = Object.keys(item);
             if (keysData.length !== 2) {
-                return response.status(400).json({ message: 'Data item can only have \"name\" and \"quantity\"' })
+                return response.status(400).json({ message: 'Data item can only have \"name\" and \"quantity\"' });
             }
             const dataRequiredKeys: Array<DataListRequiredKeys> = ['name', 'quantity'];
-            let containsAllDataRequired: boolean = dataRequiredKeys.every((key: string) => keysData.includes(key));
-
-            if (request.method === 'PATCH') {
-                containsAllDataRequired = dataRequiredKeys.some((key: string) => keysData.includes(key));
-            }
+            const containsAllDataRequired: boolean = dataRequiredKeys.every((key: string) => keysData.includes(key));
             if (!containsAllDataRequired) {
                 return response.status(400).json({ message: 'Required fields are: \"name\" and \"quantity\"' });
             }
@@ -37,8 +33,6 @@ export const validateBodyMiddleware = (request: Request, response: Response, nex
                 return response.status(400).json({ message: 'data.quantity must be string' });
             }
         });
-
-
     }
     next();
 }
