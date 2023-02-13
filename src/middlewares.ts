@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { DataListRequiredKeys, PurchaseListRequiredKeys } from "./interfaces";
+import { DataListRequiredKeys, PurchaseListRequiredKeys } from './interfaces';
+import { idsList } from './database';
 
 export const validateBodyMiddleware = (request: Request, response: Response, next: NextFunction): Response | void => {
     const keys: Array<string> = Object.keys(request.body);
@@ -34,5 +35,14 @@ export const validateBodyMiddleware = (request: Request, response: Response, nex
             }
         });
     }
-    next();
+    return next();
+}
+
+export const ensureListExists = (request: Request, response: Response, next: NextFunction): Response | void => {
+    const idParam = parseInt(request.params.id);
+    const idExists = idsList.includes(idParam);
+    if (!idExists) {
+        return response.status(404).json({ message: `List with id ${idParam} does not exist` });
+    }
+    return next();
 }

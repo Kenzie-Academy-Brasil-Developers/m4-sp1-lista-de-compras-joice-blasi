@@ -1,4 +1,4 @@
-import { request, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { IProducts, IPurchaseListId, DataListRequiredKeys } from './interfaces';
 import { shoppingLists, idsList } from './database';
 
@@ -14,27 +14,19 @@ export const createPurchaseList = (request: Request, response: Response): Respon
 }
 
 export const readAllPurchaseList = (request: Request, response: Response): Response => {
-    return response.status(200).json(shoppingLists);
+    return response.json(shoppingLists);
 }
 
 export const readPurchaseListId = (request: Request, response: Response): Response => {
     const idParam = parseInt(request.params.id);
-    const idExists = idsList.includes(idParam);
-    if (idExists) {
-        const listIdParam = shoppingLists.find(list => list.id === idParam);
-        return response.status(200).json(listIdParam);
-    }
-    return response.status(404).json({ message: `List with id ${idParam} does not exist` });
+    const listIdParam = shoppingLists.find(list => list.id === idParam);
+    return response.json(listIdParam);
 }
 
-export const updateItemByName = (request: Request, response: Response) => {
+export const updateItemByName = (request: Request, response: Response): Response => {
     const idParam = parseInt(request.params.id);
     const nameParam = request.params.name;
-    const idExists = idsList.includes(idParam);
 
-    if (!idExists) {
-        return response.status(404).json({ message: `List with id ${idParam} does not exist` });
-    }
     const list: IPurchaseListId | undefined = shoppingLists.find(list => list.id === idParam);
     if (!list) {
         return response.status(404).json({ message: `List with id ${idParam} does not exist` });
@@ -62,35 +54,27 @@ export const updateItemByName = (request: Request, response: Response) => {
     }
     nameExists.name = name;
     nameExists.quantity = quantity;
-    return response.status(200).json(nameExists);
+    return response.json(nameExists);
 }
 
-export const deleteItemByName = (request: Request, response: Response): Response => {
+export const deleteItemByName = (request: Request, response: Response): Response | void => {
     const idParam = parseInt(request.params.id);
     const nameParam = request.params.name;
-    const idExists = idsList.includes(idParam);
 
-    if (idExists) {
-        const list: IPurchaseListId | undefined = shoppingLists.find(list => list.id === idParam);
-        if (list) {
-            const data: Array<IProducts> = list.data;
-            const nameExists = data.findIndex(item => item.name === nameParam);
-            if (nameExists !== -1) {
-                data.splice(nameExists, 1);
-                return response.status(204).send('');
-            }
-            return response.status(404).json({ message: `Item with name ${nameParam} does not exist` });
+    const list: IPurchaseListId | undefined = shoppingLists.find(list => list.id === idParam);
+    if (list) {
+        const data: Array<IProducts> = list.data;
+        const nameExists = data.findIndex(item => item.name === nameParam);
+        if (nameExists !== -1) {
+            data.splice(nameExists, 1);
+            return response.status(204).send('');
         }
+        return response.status(404).json({ message: `Item with name ${nameParam} does not exist` });
     }
-    return response.status(404).json({ message: `List with id ${idParam} does not exist` });
 }
 
 export const deleteListById = (request: Request, response: Response): Response => {
     const idParam = parseInt(request.params.id);
-    const idExists = idsList.includes(idParam);
-    if (idExists) {
-        shoppingLists.splice(idParam - 1, 1);
-        return response.status(204).send('');
-    }
-    return response.status(404).json({ message: `List with id ${idParam} does not exist` });
+    shoppingLists.splice(idParam - 1, 1);
+    return response.status(204).send('');
 }
